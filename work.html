@@ -20,7 +20,7 @@
         table {
             border-collapse: collapse;
             font-size: 10px;
-            width: 48%;
+            width: 30%;
             margin: 0 1%;
         }
 
@@ -58,81 +58,105 @@
             </thead>
             <tbody id="table-body-f2"></tbody>
         </table>
+        <table>
+            <thead>
+                <tr>
+                    <th>x (f3)</th>
+                    <th>f3(x)</th>
+                </tr>
+            </thead>
+            <tbody id="table-body-f3"></tbody>
+        </table>
     </div>
 
     <script>
-        // Первая функция f1(x)
+        // Функции
         function f1(x) {
             return Math.pow(Math.abs(x), x + 2) + Math.sin(x);
         }
 
-        // Вторая функция f2(x)
         function f2(x) {
             return Math.pow(3, x + 3) + 2 * x;
         }
 
-        // Параметры графиков
-        const step = 0.11; // Увеличенный шаг табуляции
-        const boundary = 2.38; // Точка разделения
+        function f3(x) {
+            return Math.pow(x ** 2 + x + 1, 1 / 5);
+        }
+
+        // Интервалы
+        const xStart = -3.7;
+        const xEnd = 8.5;
+        const step = 0.11; // Шаг табуляции
+
+        // Деление интервала на три равные части
+        const segmentLength = (xEnd - xStart) / 3;
+
+        // Интервалы для каждой функции
+        const intervalF1 = [xStart, xStart + segmentLength];
+        const intervalF2 = [xStart + segmentLength, xStart + 2 * segmentLength];
+        const intervalF3 = [xStart + 2 * segmentLength, xEnd];
 
         // Массивы значений
         const xValuesF1 = [];
         const yValuesF1 = [];
         const xValuesF2 = [];
         const yValuesF2 = [];
+        const xValuesF3 = [];
+        const yValuesF3 = [];
 
-        // Табличные данные
-        const tableDataF1 = [];
-        const tableDataF2 = [];
-
-        // Генерация значений для первой функции (f1 на первом отрезке)
-        for (let x = -3.7; x <= boundary; x += step) {
+        // Генерация значений для f1
+        for (let x = intervalF1[0]; x <= intervalF1[1]; x += step) {
             const xRounded = parseFloat(x.toFixed(3));
             xValuesF1.push(xRounded);
             yValuesF1.push(f1(xRounded));
-            tableDataF1.push({ x: xRounded, f: f1(xRounded) });
         }
 
-        // Генерация значений для второй функции (f2 на втором отрезке)
-        for (let x = boundary + step; x <= 8.5; x += step) {
+        // Генерация значений для f2
+        for (let x = intervalF2[0]; x <= intervalF2[1]; x += step) {
             const xRounded = parseFloat(x.toFixed(3));
             xValuesF2.push(xRounded);
             yValuesF2.push(f2(xRounded));
-            tableDataF2.push({ x: xRounded, f: f2(xRounded) });
         }
 
-        // Отображение таблицы для f1
+        // Генерация значений для f3
+        for (let x = intervalF3[0]; x <= intervalF3[1]; x += step) {
+            const xRounded = parseFloat(x.toFixed(3));
+            xValuesF3.push(xRounded);
+            yValuesF3.push(f3(xRounded));
+        }
+
+        // Табличные данные
         const tableBodyF1 = document.getElementById("table-body-f1");
-        tableDataF1.forEach(row => {
+        xValuesF1.forEach((x, i) => {
             const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${row.x}</td>
-                <td>${row.f}</td>
-            `;
+            tr.innerHTML = `<td>${x}</td><td>${yValuesF1[i]}</td>`;
             tableBodyF1.appendChild(tr);
         });
 
-        // Отображение таблицы для f2
         const tableBodyF2 = document.getElementById("table-body-f2");
-        tableDataF2.forEach(row => {
+        xValuesF2.forEach((x, i) => {
             const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${row.x}</td>
-                <td>${row.f}</td>
-            `;
+            tr.innerHTML = `<td>${x}</td><td>${yValuesF2[i]}</td>`;
             tableBodyF2.appendChild(tr);
         });
+        
 
-        // Настройка графиков
+        const tableBodyF3 = document.getElementById("table-body-f3");
+        xValuesF3.forEach((x, i) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${x}</td><td>${yValuesF3[i]}</td>`;
+            tableBodyF3.appendChild(tr);
+        });
+
+        // Построение графика
         const ctx = document.getElementById('chart').getContext('2d');
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: xValuesF1.concat(xValuesF2),
                 datasets: [
                     {
                         label: 'f1(x) = |x|^(x + 2) + sin(x)',
-                        data: yValuesF1,
+                        data: xValuesF1.map((x, i) => ({ x, y: yValuesF1[i] })),
                         borderColor: 'blue',
                         borderWidth: 1,
                         fill: false,
@@ -140,39 +164,46 @@
                     },
                     {
                         label: 'f2(x) = 3^(x + 3) + 2x',
-                        data: Array(xValuesF1.length).fill(null).concat(yValuesF2),
+                        data: xValuesF2.map((x, i) => ({ x, y: yValuesF2[i] })),
                         borderColor: 'red',
                         borderWidth: 1,
                         fill: false,
                         pointRadius: 1,
-                    }
-                ]
+                    },
+                    {
+                        label: 'f3(x) = ⁵√(x² + x + 1)',
+                        data: xValuesF3.map((x, i) => ({ x, y: yValuesF3[i] })),
+                        borderColor: 'green',
+                        borderWidth: 1,
+                        fill: false,
+                        pointRadius: 1,
+                    },
+                ],
             },
             options: {
                 responsive: true,
                 plugins: {
                     legend: {
-                        display: true
+                        display: true,
                     },
-                    tooltip: {
-                        enabled: true
-                    }
                 },
                 scales: {
                     x: {
                         title: {
                             display: true,
-                            text: 'x'
-                        }
+                            text: 'x',
+                        },
+                        type: 'linear',
+                        position: 'bottom',
                     },
                     y: {
                         title: {
                             display: true,
-                            text: 'f(x)'
-                        }
-                    }
-                }
-            }
+                            text: 'f(x)',
+                        },
+                    },
+                },
+            },
         });
     </script>
 </body>
