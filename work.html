@@ -3,57 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>График функции</title>
+    <title>График функций</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+        canvas {
+            margin-bottom: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            font-size: 10px;
+            width: 48%;
+            margin: 0 1%;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 2px 4px;
+            text-align: center;
+        }
+
+        .tables-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
-    <div id="chart-container">
-        <canvas id="chart" width="600" height="400"></canvas>
+    <canvas id="chart" width="600" height="400"></canvas>
+    <div class="tables-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>x (f1)</th>
+                    <th>f1(x)</th>
+                </tr>
+            </thead>
+            <tbody id="table-body-f1"></tbody>
+        </table>
+        <table>
+            <thead>
+                <tr>
+                    <th>x (f2)</th>
+                    <th>f2(x)</th>
+                </tr>
+            </thead>
+            <tbody id="table-body-f2"></tbody>
+        </table>
     </div>
-    <table>
-        <thead>
-            <tr>
-                <th>x</th>
-                <th>f1(x)</th>
-            </tr>
-        </thead>
-        <tbody id="table-body"></tbody>
-    </table>
 
     <script>
-        // Функция f1(x)
+        // Первая функция f1(x)
         function f1(x) {
             return Math.pow(Math.abs(x), x + 2) + Math.sin(x);
         }
 
-        // Генерация значений для графика
-        const step = 0.11; // Шаг табулирования
-        const boundary = 2.4; // Точка разделения
-        const xValues = [];
-        const yValues = [];
-        const tableData = [];
-
-        // Генерация значений для первой половины отрезка
-        for (let x = -3.7; x <= boundary; x += step) {
-            const xRounded = parseFloat(x.toFixed(3)); // Округление до 3 знаков
-            xValues.push(xRounded);
-            yValues.push(f1(xRounded));
-            tableData.push({ x: xRounded, f: f1(xRounded) });
+        // Вторая функция f2(x)
+        function f2(x) {
+            return Math.pow(3, x + 3) + 2 * x;
         }
 
-        // Настройка графика
+        // Параметры графиков
+        const step = 0.11; // Увеличенный шаг табуляции
+        const boundary = 2.38; // Точка разделения
+
+        // Массивы значений
+        const xValuesF1 = [];
+        const yValuesF1 = [];
+        const xValuesF2 = [];
+        const yValuesF2 = [];
+
+        // Табличные данные
+        const tableDataF1 = [];
+        const tableDataF2 = [];
+
+        // Генерация значений для первой функции (f1 на первом отрезке)
+        for (let x = -3.7; x <= boundary; x += step) {
+            const xRounded = parseFloat(x.toFixed(3));
+            xValuesF1.push(xRounded);
+            yValuesF1.push(f1(xRounded));
+            tableDataF1.push({ x: xRounded, f: f1(xRounded) });
+        }
+
+        // Генерация значений для второй функции (f2 на втором отрезке)
+        for (let x = boundary + step; x <= 8.5; x += step) {
+            const xRounded = parseFloat(x.toFixed(3));
+            xValuesF2.push(xRounded);
+            yValuesF2.push(f2(xRounded));
+            tableDataF2.push({ x: xRounded, f: f2(xRounded) });
+        }
+
+        // Отображение таблицы для f1
+        const tableBodyF1 = document.getElementById("table-body-f1");
+        tableDataF1.forEach(row => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${row.x}</td>
+                <td>${row.f}</td>
+            `;
+            tableBodyF1.appendChild(tr);
+        });
+
+        // Отображение таблицы для f2
+        const tableBodyF2 = document.getElementById("table-body-f2");
+        tableDataF2.forEach(row => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${row.x}</td>
+                <td>${row.f}</td>
+            `;
+            tableBodyF2.appendChild(tr);
+        });
+
+        // Настройка графиков
         const ctx = document.getElementById('chart').getContext('2d');
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: xValues,
+                labels: xValuesF1.concat(xValuesF2),
                 datasets: [
                     {
                         label: 'f1(x) = |x|^(x + 2) + sin(x)',
-                        data: yValues,
+                        data: yValuesF1,
                         borderColor: 'blue',
-                        borderWidth: 2,
-                        fill: false
+                        borderWidth: 1,
+                        fill: false,
+                        pointRadius: 1,
+                    },
+                    {
+                        label: 'f2(x) = 3^(x + 3) + 2x',
+                        data: Array(xValuesF1.length).fill(null).concat(yValuesF2),
+                        borderColor: 'red',
+                        borderWidth: 1,
+                        fill: false,
+                        pointRadius: 1,
                     }
                 ]
             },
@@ -77,22 +168,11 @@
                     y: {
                         title: {
                             display: true,
-                            text: 'f1(x)'
+                            text: 'f(x)'
                         }
                     }
                 }
             }
-        });
-
-        // Заполнение таблицы
-        const tableBody = document.getElementById("table-body");
-        tableData.forEach(row => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${row.x}</td>
-                <td>${row.f}</td>
-            `;
-            tableBody.appendChild(tr);
         });
     </script>
 </body>
