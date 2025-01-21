@@ -7,9 +7,20 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <canvas id="chart" width="800" height="400"></canvas>
-    <script>
+    <div id="chart-container">
+        <canvas id="chart" width="600" height="400"></canvas>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>x</th>
+                <th>f1(x)</th>
+            </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+    </table>
 
+    <script>
         // Функция f1(x)
         function f1(x) {
             return Math.pow(Math.abs(x), x + 2) + Math.sin(x);
@@ -17,12 +28,17 @@
 
         // Генерация значений для графика
         const step = 0.11; // Шаг табулирования
+        const boundary = 2.4; // Точка разделения
         const xValues = [];
         const yValues = [];
-        for (let x = -3.7; x <= 8.5; x += step) {
+        const tableData = [];
+
+        // Генерация значений для первой половины отрезка
+        for (let x = -3.7; x <= boundary; x += step) {
             const xRounded = parseFloat(x.toFixed(3)); // Округление до 3 знаков
             xValues.push(xRounded);
             yValues.push(f1(xRounded));
+            tableData.push({ x: xRounded, f: f1(xRounded) });
         }
 
         // Настройка графика
@@ -31,13 +47,15 @@
             type: 'line',
             data: {
                 labels: xValues,
-                datasets: [{
-                    label: 'f1(x) = |x|^(x + 2) + sin(x)',
-                    data: yValues,
-                    borderColor: 'blue',
-                    borderWidth: 2,
-                    fill: false
-                }]
+                datasets: [
+                    {
+                        label: 'f1(x) = |x|^(x + 2) + sin(x)',
+                        data: yValues,
+                        borderColor: 'blue',
+                        borderWidth: 2,
+                        fill: false
+                    }
+                ]
             },
             options: {
                 responsive: true,
@@ -64,6 +82,17 @@
                     }
                 }
             }
+        });
+
+        // Заполнение таблицы
+        const tableBody = document.getElementById("table-body");
+        tableData.forEach(row => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${row.x}</td>
+                <td>${row.f}</td>
+            `;
+            tableBody.appendChild(tr);
         });
     </script>
 </body>
